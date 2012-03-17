@@ -1,0 +1,52 @@
+#body_content {
+    padding-top: 20px;
+    background-color: white;
+}
+
+#app_header {
+    font-size: 40px;
+    text-align: center;
+}
+
+.title {
+    font-size: 20px;
+    padding-bottom: 10px;
+}
+
+
+#parents_and_offspring {
+    padding-top: 20px;
+}
+
+#artist_parents {
+    display: inline-block;
+    width: 50%;
+    height: 200px;
+    vertical-align: top;
+}
+
+#artist_offspring {
+    display: inline-block;
+    height: 200px;
+    vertical-align: top;
+}
+
+.artist {
+    cursor: pointer;
+}
+
+.selected_artist.level2 {
+    font-size: 14px;
+}
+
+.selected_artist.level3 {
+    font-size: 16px;
+}
+
+.selected_artist.level4 {
+    font-size: 18px;
+}
+
+.selected_artist.level5 {
+    font-size: 20px;
+}

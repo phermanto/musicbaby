@@ -1,0 +1,15 @@
+{
+    "BundleType": "Application",
+    "RequiredPermissions": [
+        "http://*.echonest.com",
+        "http://*.spotify.com"
+    ],
+    "BundleIdentifier": "musicbaby",
+    "BundleVersion": "0.2",
+    "AppIcon": { "18x15": "logo.png"},
+    "AppName": { "en": "Music, Baby"},
+    "SupportedLanguages": ["en"],
+    "AppDescription":
+        "Make a music baby",
+    "VendorIdentifier": "com.imm"
+}

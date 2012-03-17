@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link type="text/css" rel="stylesheet" href="style/overall.css">
+        <link type="text/css" rel="stylesheet" href="style/bootstrap.css">
+
+        <script type="text/javascript" src="javascript/3p/jquery.min.js"></script>
+        <script type="text/javascript" src="javascript/3p/ejs_0.9_alpha_1_production.js"></script>
+        <script type="text/javascript" src="javascript/3p/underscore.js"></script>
+        <script type="text/javascript" src="javascript/musicbaby.js"></script>
+        <script type="text/javascript" src="javascript/api_request.js"></script>
+    </head>
+    <body
+        onload="sp = getSpotifyApi(1); sp.require('javascript/3p/jquery.min');">
+
+        <div id="body_content"></div>
+        
+        <script>
+            var html = new EJS({url: 'templates/artist_parents_template.ejs'}).render({});
+            $('#body_content').append(html);
+        </script>
+    </body>
+</html>
