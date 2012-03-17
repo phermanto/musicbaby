@@ -24,40 +24,42 @@ function displayResult(data) {
 }
 
 function _addArtistToParents() {
-    var artistName = $('#add_artist_search').val();
-     $('#add_artist_search').val("");
-    // TODO: we should be able to search eventually
-    _renderTemplate("selected_artist_template", $("#selected_artists"), {artistName: artistName});
-
+    var artistName = $('#add_artist_search').val().trim();
+    if (artistName.length > 0) {
+         $('#add_artist_search').val("");
+        // TODO: we should be able to search eventually
+        _renderTemplate("selected_artist_template", $("#selected_artists"), {artistName: artistName});
     
-    $('.increase_artist_influence').click(function (elem) {
-        var parentElement = $(this.parentElement);
-        var classes = parentElement.attr('class');
-        var level = classes.substring(classes.indexOf("level"), classes.indexOf("level") + 6);
         
-        var currLevelIndex = LEVELS.indexOf(level);
-        if (currLevelIndex !== LEVELS.length - 1) {
-            parentElement.removeClass(level);
-            var nextLevel = LEVELS[currLevelIndex + 1];
-            parentElement.addClass(nextLevel);
-        }
-    });
-    $('.decrease_artist_influence').click(function (elem) {
-        var parentElement = $(this.parentElement);
-        var classes = parentElement.attr('class');
-        var level = classes.substring(classes.indexOf("level"), classes.indexOf("level") + 6);
-        
-        var currLevelIndex = LEVELS.indexOf(level);
-        if (currLevelIndex !== 0) {
-            parentElement.removeClass(level);
-            var prevLevel = LEVELS[currLevelIndex - 1];
-            parentElement.addClass(prevLevel);
-        }
-    });
-    $('.remove_selected_artist').click(function (elem) {
-        $(this.parentElement).remove();
-    });
-    _addArtistClickListener();
+        $('.increase_artist_influence').click(function (elem) {
+            var parentElement = $(this.parentElement);
+            var classes = parentElement.attr('class');
+            var level = classes.substring(classes.indexOf("level"), classes.indexOf("level") + 6);
+            
+            var currLevelIndex = LEVELS.indexOf(level);
+            if (currLevelIndex !== LEVELS.length - 1) {
+                parentElement.removeClass(level);
+                var nextLevel = LEVELS[currLevelIndex + 1];
+                parentElement.addClass(nextLevel);
+            }
+        });
+        $('.decrease_artist_influence').click(function (elem) {
+            var parentElement = $(this.parentElement);
+            var classes = parentElement.attr('class');
+            var level = classes.substring(classes.indexOf("level"), classes.indexOf("level") + 6);
+            
+            var currLevelIndex = LEVELS.indexOf(level);
+            if (currLevelIndex !== 0) {
+                parentElement.removeClass(level);
+                var prevLevel = LEVELS[currLevelIndex - 1];
+                parentElement.addClass(prevLevel);
+            }
+        });
+        $('.remove_selected_artist').click(function (elem) {
+            $(this.parentElement).remove();
+        });
+        _addArtistClickListener();
+    }
 }
 
 function _addArtistClickListener() {
