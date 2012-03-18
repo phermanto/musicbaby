@@ -23,14 +23,23 @@
     display: inline-block;
     height: 200px;
     vertical-align: top;
+    width: 45%;
 }
 
 .artist {
     cursor: pointer;
 }
 
+selected_artist_action {
+    width: 3px;
+}
+
 .selected_artist.level2 {
     font-size: 14px;
+}
+
+.offspring_artist {
+    font-size: 16px;
 }
 
 .selected_artist.level3 {

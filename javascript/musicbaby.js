@@ -41,7 +41,7 @@ function _addArtistToParents() {
     
         
         $('.increase_artist_influence').click(function (elem) {
-            var parentElement = $(this.parentElement);
+            var parentElement = $(this.parentElement.parentElement);
             var level = _getArtistLevel(parentElement);
 
             var currLevelIndex = LEVELS.indexOf(level);
@@ -52,7 +52,7 @@ function _addArtistToParents() {
             }
         });
         $('.decrease_artist_influence').click(function (elem) {
-            var parentElement = $(this.parentElement);
+            var parentElement = $(this.parentElement.parentElement);
             var level = _getArtistLevel(parentElement);
 
             var currLevelIndex = LEVELS.indexOf(level);
@@ -63,7 +63,7 @@ function _addArtistToParents() {
             }
         });
         $('.remove_selected_artist').click(function (elem) {
-            $(this.parentElement).remove();
+            $(this.parentElement.parentElement).remove();
         });
         _addArtistClickListener();
     }
@@ -105,6 +105,10 @@ $(document).ready(function () {
                 }
             });
         }
+    });
+    $('#clear_artists_button').click(function () {
+        $('.selected_artist').remove();
+        $('.offspring_artist').remove();
     });
     // ability to make children
     $('#make_babies_button').click(_fetchSimilarArtists)
