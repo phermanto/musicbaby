@@ -30,7 +30,7 @@
     cursor: pointer;
 }
 
-selected_artist_action {
+.selected_artist_action {
     width: 3px;
 }
 
