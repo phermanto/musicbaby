@@ -5,7 +5,9 @@ function getSimilarArtists(artistNames) {
     var similarUrl = 'http://developer.echonest.com/api/v4/artist/similar?api_key=' + API_KEYS.ECHONEST;
     var options = '&format=json&results=' + NUM_RESULTS + '&start=0';
     var nameParameters = _.map(artistNames, function (name) {
-        return '&name=' + name.trim().split(' ').join('%20');
+        var artistElem = $('.artist:contains(' + name + ')').parent();
+        var level = _getArtistLevel(artistElem);
+        return '&name=' + name.split(' ').join('%20') + "^" + LEVELS.indexOf(level);
     }); 
     var nameParameter = nameParameters.join("");
     var url = similarUrl + options + nameParameter;
@@ -23,6 +25,13 @@ function displayResult(data) {
     _addArtistClickListener();
 }
 
+function _getArtistLevel(artistElement) {
+    var classPrefix = "level";
+
+    var classes = artistElement.attr('class');
+    return classes.substring(classes.indexOf(classPrefix), classes.indexOf(classPrefix) + classPrefix.length + 1);
+}
+
 function _addArtistToParents() {
     var artistName = $('#add_artist_search').val().trim();
     if (artistName.length > 0) {
@@ -33,9 +42,8 @@ function _addArtistToParents() {
         
         $('.increase_artist_influence').click(function (elem) {
             var parentElement = $(this.parentElement);
-            var classes = parentElement.attr('class');
-            var level = classes.substring(classes.indexOf("level"), classes.indexOf("level") + 6);
-            
+            var level = _getArtistLevel(parentElement);
+
             var currLevelIndex = LEVELS.indexOf(level);
             if (currLevelIndex !== LEVELS.length - 1) {
                 parentElement.removeClass(level);
@@ -45,9 +53,8 @@ function _addArtistToParents() {
         });
         $('.decrease_artist_influence').click(function (elem) {
             var parentElement = $(this.parentElement);
-            var classes = parentElement.attr('class');
-            var level = classes.substring(classes.indexOf("level"), classes.indexOf("level") + 6);
-            
+            var level = _getArtistLevel(parentElement);
+
             var currLevelIndex = LEVELS.indexOf(level);
             if (currLevelIndex !== 0) {
                 parentElement.removeClass(level);
@@ -72,7 +79,7 @@ function _addArtistClickListener() {
 function _fetchSimilarArtists() {
     var artistParents = $('.selected_artist');
     var artistNames = _.map(artistParents, function (artist) {
-        return $(artist).text();
+        return $(artist).text().trim();
     });
     getSimilarArtists(artistNames);
 }
