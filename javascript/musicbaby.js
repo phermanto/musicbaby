@@ -90,6 +90,13 @@ function _renderTemplate(templateName, elem, params) {
 }
 
 $(document).ready(function () {
+    // ability to add artist to parents
     $('#add_artist_button').click(_addArtistToParents);
+    $('#add_artist_search').keyup(function (e) {
+        if (e.keyCode === 13) {
+            _addArtistToParents();
+        }
+    });
+    // ability to make children
     $('#make_babies_button').click(_fetchSimilarArtists)
 });
