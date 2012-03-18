@@ -7,10 +7,10 @@ function getSimilarArtists(artistNames) {
     var nameParameters = _.map(artistNames, function (name) {
         var artistElem = $('.artist:contains(' + name + ')').parent();
         var level = _getArtistLevel(artistElem);
-        return '&name=' + name.split(' ').join('%20') + "^" + LEVELS.indexOf(level);
+        return '&name=' + name + "^" + LEVELS.indexOf(level);
     }); 
     var nameParameter = nameParameters.join("");
-    var url = similarUrl + options + nameParameter;
+    var url = encodeURI(similarUrl + options + nameParameter);
 
     apiGet(url, function (data) {
         displayResult(data);
@@ -84,17 +84,26 @@ function _fetchSimilarArtists() {
     getSimilarArtists(artistNames);
 }
 
-function _renderTemplate(templateName, elem, params) {
-    var html = new EJS({url: 'templates/' + templateName + ".ejs"}).render(params);
-    elem.append(html);
-}
-
 $(document).ready(function () {
     // ability to add artist to parents
     $('#add_artist_button').click(_addArtistToParents);
     $('#add_artist_search').keyup(function (e) {
         if (e.keyCode === 13) {
             _addArtistToParents();
+        }
+    });
+    $('#add_artist_search').typeahead({
+        source: function (typeahead, query) {
+            var url = encodeURI("http://ws.spotify.com/search/1/artist.json?q=" + query);
+            $.ajax({
+                url: url,
+                success: function (data) {
+                    var artists = _.map(data.artists, function (artist) {
+                        return artist.name;
+                    });
+                    typeahead.process(artists);
+                }
+            });
         }
     });
     // ability to make children
