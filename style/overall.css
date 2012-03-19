@@ -39,30 +39,29 @@ html {
     width: 45%;
 }
 
-.artist {
+.table .artist {
     cursor: pointer;
 }
 
-.selected_artist_action {
+.table .selected_artist_action {
     width: 3px;
+    padding-left: 1px;
+    padding-right: 1px;
 }
 
-.selected_artist.level2 {
-    font-size: 14px;
+.selected_artist_influence {
+    width: 40px;
 }
 
-.offspring_artist {
+.artist {
     font-size: 16px;
 }
 
-.selected_artist.level3 {
-    font-size: 16px;
+#artist_image {
+    float: left;
 }
 
-.selected_artist.level4 {
-    font-size: 18px;
+#artist_blurb {
+    display: inline;
 }
 
-.selected_artist.level5 {
-    font-size: 20px;
-}
