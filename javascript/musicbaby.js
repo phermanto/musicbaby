@@ -81,8 +81,8 @@ function _addArtistClickListener(artistAddedElem) {
         // show artist image
         $.when(getArtistInfo(artistName))
             .pipe(function(data) {
-                if (data.image.length !== 0) {
-                    _showArtistImage(data);
+                if (data.image && data.image.length !== 0) {
+                    _showArtistImage(data.uri, data.image);
                 } else {
                     _showArtistAlbumImage(data.uri, _showArtistImage);
                 }
@@ -90,7 +90,7 @@ function _addArtistClickListener(artistAddedElem) {
     });
 }
 
-function _fetchSimilarArtistsHandler() {
+function _fetchSiilarArtistsHandler() {
     var artistParents = $('.selected_artist');
     var artists = _.map(artistParents, function (artist) {
         var artistElem = $(artist);
@@ -100,6 +100,7 @@ function _fetchSimilarArtistsHandler() {
         };
     });
     // get and display similar artists
+    $("#divider").show();
     $.when(getSimilarArtists(artists))
         .then(function (similarArtists) {
             displaySimilarArtistsResult(similarArtists);
@@ -135,14 +136,16 @@ function displaySimilarArtistsResult(artists) {
     });
 }
 
-function _showArtistImage(data) {
-    renderTemplate('artist_info_image', $('#artist_image'), {artist_image: data.image}, true);
+function _showArtistImage(uri, image) {
+    renderTemplate('artist_info_image', $('#artist_image'), {artistImage: image, artistLink: uri}, true);
 }
 
 function _showArtistAlbumImage(artistURI, callback) {
     // this method almost always returns an image but figuring out this spotify api callback is ... difficult
     sp.core.browseUri(artistURI, {
-        onSuccess: callback
+        onSuccess: function (data) {
+            callback(artistURI, data.image);
+        }
     });
 }
 
@@ -162,6 +165,13 @@ function _getArtistURI(artist) {
     var url = "http://ws.spotify.com/search/1/artist.json?q=" + encodeURI(artist);
     return $.get(url).pipe(function (data) {
         return data.artists[0].href;
+    });
+}
+
+function _getTrackURI(track) {
+    var url = "http://ws.spotify.com/search/1/track.json?q=" + encodeURI(track);
+    return $.get(url).pipe(function (data) {
+        return data;;
     });
 }
 
@@ -190,7 +200,9 @@ $(document).ready(function () {
     $('#clear_artists_button').click(function () {
         $('.selected_artist').remove();
         $('.offspring_artist').remove();
+        $("#divider").hide();
     });
+    $("#divider").hide();
     // ability to make children
     $('#make_babies_button').click(_fetchSimilarArtistsHandler)
 });

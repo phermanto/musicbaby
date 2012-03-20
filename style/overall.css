@@ -4,6 +4,8 @@
 
 html {
     background-color:white;
+    overflow: -moz-scrollbars-vertical; 
+    overflow-y: scroll;
 }
 
 #app_header {
@@ -11,6 +13,10 @@ html {
     text-align: center;
     padding-bottom: 20px;
     border-bottom: 3px solid black;
+}
+
+#parents_and_offspring {
+    padding: 10px;
 }
 
 #divider {
@@ -22,6 +28,8 @@ html {
     width: 0;
     height: 0;
 }
+
+/*Artist Parents and Offspring style*/
 
 #artist_search {
     padding: 5px 0px 5px 0px;
@@ -57,8 +65,15 @@ html {
     font-size: 16px;
 }
 
+/*Artist Information Style*/
+
+#artist_information {
+    padding: 10px;
+}
+
 #artist_image {
     float: left;
+    padding: 0px 10px 10px 0px;
 }
 
 #artist_blurb {
