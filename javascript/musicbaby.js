@@ -1,124 +1,145 @@
-var LEVELS = ['level1', 'level2', 'level3', 'level4', 'level5'];
-
-function getSimilarArtists(artistNames) {
-    var NUM_RESULTS = 4;
-    var similarUrl = 'http://developer.echonest.com/api/v4/artist/similar';
-    var nameParameters = _.map(artistNames, function (name) {
-        var artistElem = $('.artist:contains(' + name + ')').parent();
-        var level = _getArtistLevel(artistElem);
-        return '&name=' + name + "^" + LEVELS.indexOf(level);
-    }); 
-    var url = getEchonestURL(similarUrl, NUM_RESULTS, nameParameters.join(""));
-
-    $.when(apiGet(url))
-        .then(function (data) {
-            displaySimilarArtistsResult(data);
-        });
-}
-
-function displaySimilarArtistsResult(data) {
-    $('#offspring_artists').empty();
-    _.each(data.artists, function (artist) {
-        _renderTemplate("offspring_artist_template", $('#offspring_artists'), {artistName: artist.name})
-    });
-    _addArtistClickListener();
-}
+var INFLUENCE_SCALE = ["1", "2", "3", "4", "5"];
+var DEFAULT_INFLUENCE = INFLUENCE_SCALE[2];
 
 function getArtistBiography(artistName) {
-    var biographyUrl = "http://developer.echonest.com/api/v4/artist/biographies"
-    var parameters = "&name=" + artistName +"&license=cc-by-sa";
-    var url = getEchonestURL(biographyUrl, 1, parameters);
-    return $.when(apiGet(url))
+    var biographyUrl = "http://developer.echonest.com/api/v4/artist/biographies";
+    var parameters = [
+        {name: "name",
+         value: artistName},
+        {name: "license",
+         value: "cc-by-sa"}
+    ];
+    return $.when(echonestGet(biographyUrl, 1, parameters))
         .pipe(function (data) {
             return data.biographies[0];
         });
 }
 
-function _getArtistLevel(artistElement) {
-    var classPrefix = "level";
-
-    var classes = artistElement.attr('class');
-    return classes.substring(classes.indexOf(classPrefix), classes.indexOf(classPrefix) + classPrefix.length + 1);
+function _getArtistInfluenceIndex(artistElem) {
+    return INFLUENCE_SCALE.indexOf(artistElem.attr("influence"));
 }
 
-function _updateArtistInfluenceBar(barElem, level) {
-    var levelIndex = LEVELS.indexOf(level);
-    var percentage = levelIndex/LEVELS.length*100;
+function _updateArtistInfluenceBar(barElem, levelIndex) {
+    var percentage = levelIndex/INFLUENCE_SCALE.length*100;
     if (percentage === 0) {
         percentage += 10;
     }
     barElem.css({"width": percentage + "%"})
 }
 
-function _addArtistToParents() {
+function _addArtistToParentsHandler() {
     var artistName = $('#add_artist_search').val().trim();
+
     if (artistName.length > 0) {
+        // reset artist search bar contents
         $('#add_artist_search').val("");
-        _renderTemplate("selected_artist_template", $("#selected_artists"), {artistName: artistName});
-    
-        
-        $('.increase_artist_influence').click(function (elem) {
-            var parentElement = $(this.parentElement.parentElement);
-            var level = _getArtistLevel(parentElement);
-
-            var currLevelIndex = LEVELS.indexOf(level);
-            if (currLevelIndex !== LEVELS.length - 1) {
-                parentElement.removeClass(level);
-                var nextLevel = LEVELS[currLevelIndex + 1];
-                parentElement.addClass(nextLevel);
-                _updateArtistInfluenceBar(parentElement.find('.bar'), nextLevel);
-            }
-        });
-        $('.decrease_artist_influence').click(function (elem) {
-            var parentElement = $(this.parentElement.parentElement);
-            var level = _getArtistLevel(parentElement);
-
-            var currLevelIndex = LEVELS.indexOf(level);
-            if (currLevelIndex !== 0) {
-                parentElement.removeClass(level);
-                var prevLevel = LEVELS[currLevelIndex - 1];
-                parentElement.addClass(prevLevel);
-                _updateArtistInfluenceBar(parentElement.find('.bar'), prevLevel);
-            }
-        });
-        $('.remove_selected_artist').click(function (elem) {
-            $(this.parentElement.parentElement).remove();
-        });
-        _addArtistClickListener();
+        renderTemplate("selected_artist_template", $("#selected_artists"), {artistName: artistName, defaultInfluence: DEFAULT_INFLUENCE});
+        _addParentArtistClickListeners(_getArtistElem(artistName));
     }
 }
 
-function _addArtistClickListener() {
-    $('.artist').click(function (elem) {
+function _addParentArtistClickListeners(artistElem) {
+    var parentElem = artistElem.parent();
+    parentElem.find(".increase_artist_influence").click(_increaseParentArtistInfluenceHandler);
+    parentElem.find(".decrease_artist_influence").click(_decreaseParentArtistInfluenceHandler);
+    parentElem.find('.remove_selected_artist').click(function (elem) {
+        $(elem.currentTarget.parentElement.parentElement).remove();
+    });
+    _addArtistClickListener(artistElem);
+}
+
+function _increaseParentArtistInfluenceHandler (elem) {
+    var parentElement = $(elem.currentTarget.parentElement.parentElement);
+
+    var currLevelIndex = _getArtistInfluenceIndex(parentElement);
+    if (currLevelIndex !== INFLUENCE_SCALE.length - 1) {
+        var nextLevelIndex = currLevelIndex + 1;
+        parentElement.attr("influence", INFLUENCE_SCALE[nextLevelIndex]);
+        _updateArtistInfluenceBar(parentElement.find('.bar'), nextLevelIndex);
+    }
+}
+
+function _decreaseParentArtistInfluenceHandler (elem) {
+    var parentElement = $(elem.currentTarget.parentElement.parentElement);
+
+    var currLevelIndex = _getArtistInfluenceIndex(parentElement);
+    if (currLevelIndex !== 0) {
+        var prevLevelIndex = currLevelIndex - 1;
+        parentElement.attr("influence", INFLUENCE_SCALE[prevLevelIndex]);
+        _updateArtistInfluenceBar(parentElement.find('.bar'), prevLevelIndex);
+    }
+}
+
+function _addArtistClickListener(artistAddedElem) {
+    artistAddedElem.click(function (elem) {
         var artistName = $(elem.target).text();
+        // show artist bio data
         $.when(getArtistBiography(artistName))
             .then(function (data) {
-                _renderTemplate('artist_info_blurb', $('#artist_blurb'), {artist_blurb: data.text}, true);
+                renderTemplate('artist_info_blurb', $('#artist_blurb'), {artist_blurb: data.text}, true);
             });
-        var info = $.when(getArtistInfo(artistName))
-            .then(function(data) {
+        // show artist image
+        $.when(getArtistInfo(artistName))
+            .pipe(function(data) {
                 if (data.image.length !== 0) {
                     _showArtistImage(data);
                 } else {
-                    showArtistAlbumImage(data.uri, _showArtistImage);
+                    _showArtistAlbumImage(data.uri, _showArtistImage);
                 }
             });
     });
 }
 
-function _fetchSimilarArtists() {
+function _fetchSimilarArtistsHandler() {
     var artistParents = $('.selected_artist');
-    var artistNames = _.map(artistParents, function (artist) {
-        return $(artist).text().trim();
+    var artists = _.map(artistParents, function (artist) {
+        var artistElem = $(artist);
+        return {
+            name: artistElem.text().trim(),
+            levelIndex: _getArtistInfluenceIndex(artistElem)
+        };
     });
-    getSimilarArtists(artistNames);
+    // get and display similar artists
+    $.when(getSimilarArtists(artists))
+        .then(function (similarArtists) {
+            displaySimilarArtistsResult(similarArtists);
+        });
+}
+
+function getSimilarArtists(artists) {
+    var NUM_RESULTS = 4;
+    var similarUrl = 'http://developer.echonest.com/api/v4/artist/similar';
+    var parameters = _.map(artists, function (artist) {
+        return {
+            name: "name",
+            value: artist.name + "^" + artist.levelIndex
+        };
+    });
+
+    return $.when(echonestGet(similarUrl, NUM_RESULTS, parameters))
+        .pipe(function (data) {
+            return data.artists;
+        });
+}
+
+function _getArtistElem (artistName) {
+    return $('.artist:contains("' + artistName + '")');
+}
+
+function displaySimilarArtistsResult(artists) {
+    $('#offspring_artists').empty();
+    _.each(artists, function (artist) {
+        renderTemplate("offspring_artist_template", $('#offspring_artists'), {artistName: artist.name})
+        var offspringElem = _getArtistElem(artist.name);
+        _addArtistClickListener(offspringElem);
+    });
 }
 
 function _showArtistImage(data) {
-    _renderTemplate('artist_info_image', $('#artist_image'), {artist_image: data.image}, true);
+    renderTemplate('artist_info_image', $('#artist_image'), {artist_image: data.image}, true);
 }
 
-function showArtistAlbumImage(artistURI, callback) {
+function _showArtistAlbumImage(artistURI, callback) {
     // this method almost always returns an image but figuring out this spotify api callback is ... difficult
     sp.core.browseUri(artistURI, {
         onSuccess: callback
@@ -145,11 +166,11 @@ function _getArtistURI(artist) {
 }
 
 $(document).ready(function () {
-    // ability to add artist to parents
-    $('#add_artist_button').click(_addArtistToParents);
+    // ability to add artist to parents list
+    $('#add_artist_button').click(_addArtistToParentsHandler);
     $('#add_artist_search').keyup(function (e) {
         if (e.keyCode === 13) {
-            _addArtistToParents();
+            _addArtistToParentsHandler();
         }
     });
     $('#add_artist_search').typeahead({
@@ -171,5 +192,5 @@ $(document).ready(function () {
         $('.offspring_artist').remove();
     });
     // ability to make children
-    $('#make_babies_button').click(_fetchSimilarArtists)
+    $('#make_babies_button').click(_fetchSimilarArtistsHandler)
 });

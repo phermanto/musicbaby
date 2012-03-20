@@ -7,14 +7,28 @@ function apiGet (url) {
     });
 }
 
-function getEchonestURL (baseurl, numResults, extraParams) {
-    var echonestUrl = baseurl + '?api_key=' + API_KEYS.ECHONEST;
+function echonestGet (baseURL, numResults, parameters) {
+    var url = _getEchonestURL(baseURL, numResults, parameters);
+    return apiGet(url);
+}
+
+function _getEchonestURL (baseURL, numResults, parameters) {
+    var echonestUrl = baseURL + '?api_key=' + API_KEYS.ECHONEST;
     echonestUrl += '&format=json&results=' + numResults + '&start=0';
+    var extraParams = _getFormattedUrlParameters(parameters);
     echonestUrl += extraParams;
     return encodeURI(echonestUrl);
 }
 
-function _renderTemplate(templateName, elem, params, is_clear_elem) {
+function _getFormattedUrlParameters (parameters) {
+    var paramString = "";
+    _.each(parameters, function (parameter) {
+        paramString += "&" + parameter.name + "=" + parameter.value;
+    });
+    return paramString;
+}
+
+function renderTemplate(templateName, elem, params, is_clear_elem) {
     if (is_clear_elem) {
         elem.empty();
     }
