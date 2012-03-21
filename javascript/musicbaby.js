@@ -90,7 +90,7 @@ function _addArtistClickListener(artistAddedElem) {
     });
 }
 
-function _fetchSiilarArtistsHandler() {
+function _fetchSimilarArtistsHandler() {
     var artistParents = $('.selected_artist');
     var artists = _.map(artistParents, function (artist) {
         var artistElem = $(artist);
@@ -116,6 +116,10 @@ function getSimilarArtists(artists) {
             value: artist.name + "^" + artist.levelIndex
         };
     });
+    parameters = parameters.concat({
+        name: "bucket",
+        value: "songs"
+    });
 
     return $.when(echonestGet(similarUrl, NUM_RESULTS, parameters))
         .pipe(function (data) {
@@ -130,7 +134,11 @@ function _getArtistElem (artistName) {
 function displaySimilarArtistsResult(artists) {
     $('#offspring_artists').empty();
     _.each(artists, function (artist) {
-        renderTemplate("offspring_artist_template", $('#offspring_artists'), {artistName: artist.name})
+        // get a song from artist
+        // TODO: get top hit instead
+        var song = artist.songs[0].title;
+
+        renderTemplate("offspring_artist_template", $('#offspring_artists'), {artistName: artist.name, song: song})
         var offspringElem = _getArtistElem(artist.name);
         _addArtistClickListener(offspringElem);
     });
