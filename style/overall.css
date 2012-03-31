@@ -47,7 +47,7 @@ html {
     width: 45%;
 }
 
-.table .artist {
+.table .row {
     cursor: pointer;
 }
 
@@ -61,8 +61,12 @@ html {
     width: 40px;
 }
 
-.artist {
+.row {
     font-size: 16px;
+}
+
+.play_song:hover {
+    background: url("../img/play_button.png") no-repeat -1px;
 }
 
 /*Artist Information Style*/

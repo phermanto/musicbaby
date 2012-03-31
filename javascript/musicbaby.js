@@ -73,6 +73,10 @@ function _decreaseParentArtistInfluenceHandler (elem) {
 function _addArtistClickListener(artistAddedElem) {
     artistAddedElem.click(function (elem) {
         var artistName = $(elem.target).text();
+
+        // get top songs for an artist
+        _getTopSongs(artistName, _displayArtistSongs);
+
         // show artist bio data
         $.when(getArtistBiography(artistName))
             .then(function (data) {
@@ -116,10 +120,6 @@ function getSimilarArtists(artists) {
             value: artist.name + "^" + artist.levelIndex
         };
     });
-    parameters = parameters.concat({
-        name: "bucket",
-        value: "songs"
-    });
 
     return $.when(echonestGet(similarUrl, NUM_RESULTS, parameters))
         .pipe(function (data) {
@@ -134,11 +134,7 @@ function _getArtistElem (artistName) {
 function displaySimilarArtistsResult(artists) {
     $('#offspring_artists').empty();
     _.each(artists, function (artist) {
-        // get a song from artist
-        // TODO: get top hit instead
-        var song = artist.songs[0].title;
-
-        renderTemplate("offspring_artist_template", $('#offspring_artists'), {artistName: artist.name, song: song})
+        renderTemplate("offspring_artist_template", $('#offspring_artists'), {artistName: artist.name})
         var offspringElem = _getArtistElem(artist.name);
         _addArtistClickListener(offspringElem);
     });
@@ -176,11 +172,36 @@ function _getArtistURI(artist) {
     });
 }
 
-function _getTrackURI(track) {
-    var url = "http://ws.spotify.com/search/1/track.json?q=" + encodeURI(track);
-    return $.get(url).pipe(function (data) {
-        return data;;
+function _getTopSongs(artist, topSongsHandler) {
+    var sp = getSpotifyApi(1);
+    var models = sp.require("sp://import/scripts/api/models");
+    var views = sp.require("sp://import/scripts/api/views");
+
+    var playlist = [];
+
+    var search = new models.Search('artist:"' + artist + '"');
+    search.localResults = models.LOCALSEARCHRESULTS.IGNORE;
+    search.searchPlaylists = false;
+    search.searchAlbums = false;
+    search.pageSize = 5;
+
+    search.observe(models.EVENT.CHANGE, function(result) {
+        result.tracks.forEach(function(track) {
+            playlist.push(track);
+        });
+
+        _displayArtistSongs(playlist);
     });
+
+    search.appendNext();
+}
+
+function _displayArtistSongs(tracks) {
+    $("#artist_songs").empty();
+    _.each(tracks, function (track) {
+        renderTemplate("artist_song_template", $('#artist_songs'), {songName: track.name, songUri: track.uri})
+    });
+    
 }
 
 $(document).ready(function () {
