@@ -84,3 +84,12 @@ html {
     display: inline;
 }
 
+#top_songs_player {
+    width: 150px;
+    float: left;
+}
+
+#top_songs_table {
+    width: 400px;
+}
+

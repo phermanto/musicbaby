@@ -173,7 +173,6 @@ function _getArtistURI(artist) {
 }
 
 function _getTopSongs(artist, topSongsHandler) {
-    var sp = getSpotifyApi(1);
     var models = sp.require("sp://import/scripts/api/models");
     var views = sp.require("sp://import/scripts/api/views");
 
@@ -190,18 +189,32 @@ function _getTopSongs(artist, topSongsHandler) {
             playlist.push(track);
         });
 
-        _displayArtistSongs(playlist);
+        topSongsHandler(playlist);
     });
 
     search.appendNext();
 }
 
 function _displayArtistSongs(tracks) {
+    // display list of songs
     $("#artist_songs").empty();
     _.each(tracks, function (track) {
         renderTemplate("artist_song_template", $('#artist_songs'), {songName: track.name, songUri: track.uri})
     });
+    // display track player
+    var models = sp.require("sp://import/scripts/api/models");
+    var views = sp.require("sp://import/scripts/api/views");
     
+    var playlist = new models.Playlist();
+    _.each(tracks, function (track) {
+        playlist.add(track);
+    });
+    var playerView = new views.Player();
+    playerView.track = null;
+    playerView.context = playlist;
+    
+    $("#top_songs_player").empty();
+    $("#top_songs_player").append(playerView.node);
 }
 
 $(document).ready(function () {
