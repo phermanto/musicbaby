@@ -73,6 +73,11 @@ function _decreaseParentArtistInfluenceHandler (elem) {
 function _addArtistClickListener(artistAddedElem) {
     artistAddedElem.click(function (elem) {
         var artistName = $(elem.target).text();
+        // clear any currently showing artist data
+        $("#top_songs_player").empty();
+        $("#artist_songs").empty();
+        $('#artist_blurb').empty();
+        $('#artist_image').empty();
 
         // get top songs for an artist
         _getTopSongs(artistName, _displayArtistSongs);
@@ -197,7 +202,6 @@ function _getTopSongs(artist, topSongsHandler) {
 
 function _displayArtistSongs(tracks) {
     // display list of songs
-    $("#artist_songs").empty();
     _.each(tracks, function (track) {
         renderTemplate("artist_song_template", $('#artist_songs'), {songName: track.name, songUri: track.uri})
     });
@@ -212,8 +216,7 @@ function _displayArtistSongs(tracks) {
     var playerView = new views.Player();
     playerView.track = null;
     playerView.context = playlist;
-    
-    $("#top_songs_player").empty();
+
     $("#top_songs_player").append(playerView.node);
 }
 
