@@ -27,12 +27,14 @@ function _updateArtistInfluenceBar(barElem, levelIndex) {
     barElem.css({"width": percentage + "%"})
 }
 
-function _addArtistToParentsHandler() {
-    var artistName = $('#add_artist_search').val().trim();
-
-    if (artistName.length > 0) {
+function _addArtistToParentsHandler(artistName) {
+    if (!artistName) {
+        artistName = $('#add_artist_search').val().trim();
         // reset artist search bar contents
         $('#add_artist_search').val("");
+    }
+
+    if (artistName.length > 0) {
         renderTemplate("selected_artist_template", $("#selected_artists"), {artistName: artistName, defaultInfluence: DEFAULT_INFLUENCE});
         _addParentArtistClickListeners(_getArtistElem(artistName));
     }
@@ -220,6 +222,31 @@ function _displayArtistSongs(tracks) {
     $("#top_songs_player").append(playerView.node);
 }
 
+function getUsersTopArtists (userTopArtistsHandler) {
+    var sp = getSpotifyApi(1);
+    var models = sp.require("sp://import/scripts/api/models");
+    var views = sp.require("sp://import/scripts/api/views");
+
+    var toplist = new models.Toplist();
+    /* Set attributes of the Toplist object */
+    toplist.toplistType = models.TOPLISTTYPE.USER;
+    toplist.userName = models.TOPLISTUSER_CURRENT;
+    toplist.matchType = models.TOPLISTMATCHES.ARTISTS;
+
+    toplist.observe(models.EVENT.CHANGE, function() {
+        var count = 0;
+        toplist.results.forEach(function(artist) {
+            if (count < 4) {
+                // FIXME phermanto: find out a better way to break out of this loop
+                userTopArtistsHandler(artist.data.name);
+                count ++;
+            }
+        });
+    });
+
+    toplist.run();
+}
+
 $(document).ready(function () {
     // ability to add artist to parents list
     $('#add_artist_button').click(_addArtistToParentsHandler);
@@ -250,4 +277,5 @@ $(document).ready(function () {
     $("#divider").hide();
     // ability to make children
     $('#make_babies_button').click(_fetchSimilarArtistsHandler)
+    getUsersTopArtists(_addArtistToParentsHandler);
 });
