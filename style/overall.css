@@ -15,20 +15,6 @@ html {
     border-bottom: 3px solid black;
 }
 
-#parents_and_offspring {
-    padding: 10px;
-}
-
-#divider {
-    display: inline-block;
-    margin-left: 25px;
-    margin-top: 15px;
-    border-color: white white white black;
-    border-style: solid;
-    border-width: 50px 20px 50px 20px;
-    width: 0;
-    height: 0;
-}
 
 /*Artist Parents and Offspring style*/
 
@@ -36,43 +22,23 @@ html {
     padding: 5px 0px 5px 0px;
 }
 
-#artist_parents {
-    display: inline-block;
-    width: 45%;
-    vertical-align: top;
-}
-
-#artist_offspring {
-    display: inline-block;
-    vertical-align: top;
-    width: 45%;
-}
-
-.table .row {
-    cursor: pointer;
-}
-
-.table .selected_artist_action {
-    width: 3px;
+.selected_artist_action {
     padding-left: 1px;
     padding-right: 1px;
+    float: left;
 }
 
 .selected_artist_influence {
     width: 40px;
+    float: left;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .selected_artist_influence .progress {
     margin-bottom: 0px;
 }
 
-.row {
-    font-size: 16px;
-}
-
-.play_song:hover {
-    background: url("../img/play_button.png") no-repeat -1px;
-}
 
 /*Artist Information Style*/
 
@@ -89,12 +55,11 @@ html {
     display: inline;
 }
 
-#top_songs_player {
-    width: 150px;
+/* Accordian Stuff */
+.artist_player {
     float: left;
 }
 
-#top_songs_table {
-    width: 400px;
+.artist {
+    cursor: pointer;
 }
-

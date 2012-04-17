@@ -1,39 +1,37 @@
 <div id="app_header">Music, Baby.</div>
 
-<div id="parents_and_offspring">
-    <div id="artist_search">
-        <input type="text" name="artist_search_box" id="add_artist_search" class="input-medium search-query" placeholder="Enter Artist Name"/>
-        <div class="btn" id="add_artist_button">
-            <i class="icon-plus"></i>
-        </div>
-        <div class="btn" id="clear_artists_button">
-            <i class="icon-ban-circle"></i>
-            Clear Artists
-        </div>
-        <div class="btn" id="make_babies_button">
-            <i class="icon-music"></i>
-            Make Babies!
-        </div>
-    </div>
-    <div id="artist_parents">
-        <table class="table">
-            <tbody id="selected_artists">
-            </tbody>
-        </table>
-    </div>
-    <div id="divider"></div>
-    <div id="artist_offspring">
-        <table class="table">
-            <tbody id="offspring_artists">
-            </tbody>
-        </table>
-    </div>
+<div id="parents_offspring_accordion">
+    <ol>
+        <li>
+            <h2><span>Parents</span></h2>
+            <div id="parents">
+                <div id="artist_search">
+                    <input type="text" name="artist_search_box" id="add_artist_search" class="input-medium search-query" placeholder="Enter Artist Name"/>
+                    <div class="btn" id="add_artist_button">
+                        <i class="icon-plus"></i>
+                    </div>
+                    <div class="btn" id="clear_artists_button">
+                        <i class="icon-ban-circle"></i>
+                        Clear Artists
+                    </div>
+                    <div class="btn" id="make_babies_button">
+                        <i class="icon-music"></i>
+                        Make Babies!
+                    </div>
+                </div>
+                <div id="parents_players"></div>
+            </div>
+        </li>
+        <li>
+            <h2><span>Children</span></h2>
+            <div id="offspring_players"></div>
+        </li>
+    </ol>
 </div>
 
 <div id="artist_information">
 <ul class="nav nav-tabs">
     <li class="active"><a href="#artist_intro" data-toggle="tab">Artist Introduction</a></li>
-    <li><a href="#top_songs" data-toggle="tab">Top Songs</a></li>
     <li><a href="#other" data-toggle="tab">...</a></li>
 </ul>
 <div class="tab-content">
@@ -43,12 +41,6 @@
                 
             </div>
             <span id="artist_blurb"></span>
-        </div>
-        <div class="tab-pane" id="top_songs">
-            <div id="top_songs_player"></div>
-            <table class="table" id="top_songs_table">
-                <tbody id="artist_songs">
-            </table>
         </div>
         <div class="tab-pane" id="other">
         </div>

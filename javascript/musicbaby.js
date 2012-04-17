@@ -35,8 +35,13 @@ function _addArtistToParentsHandler(artistName) {
     }
 
     if (artistName.length > 0) {
-        renderTemplate("selected_artist_template", $("#selected_artists"), {artistName: artistName, defaultInfluence: DEFAULT_INFLUENCE});
-        _addParentArtistClickListeners(_getArtistElem(artistName));
+        _showArtistPlayer(artistName, $("#parents_players"));
+        var artistPlayerElem = _getArtistPlayerElem(artistName);
+        var artistElem = artistPlayerElem.find(".artist");
+        renderTemplate("artist_parent_delete_template", artistElem, {});
+        renderTemplate("artist_parent_influence_template", artistPlayerElem, {artistName: artistName, defaultInfluence: DEFAULT_INFLUENCE});
+        
+        _addParentArtistClickListeners(artistElem);
     }
 }
 
@@ -45,7 +50,7 @@ function _addParentArtistClickListeners(artistElem) {
     parentElem.find(".increase_artist_influence").click(_increaseParentArtistInfluenceHandler);
     parentElem.find(".decrease_artist_influence").click(_decreaseParentArtistInfluenceHandler);
     parentElem.find('.remove_selected_artist').click(function (elem) {
-        $(elem.currentTarget.parentElement.parentElement).remove();
+        $(elem.currentTarget.parentElement.parentElement.parentElement).remove();
     });
     _addArtistClickListener(artistElem);
 }
@@ -74,15 +79,10 @@ function _decreaseParentArtistInfluenceHandler (elem) {
 
 function _addArtistClickListener(artistAddedElem) {
     artistAddedElem.click(function (elem) {
-        var artistName = $(elem.target).text();
+        var artistName = $(elem.target).text().trim();
         // clear any currently showing artist data
-        $("#top_songs_player").empty();
-        $("#artist_songs").empty();
         $('#artist_blurb').empty();
         $('#artist_image').empty();
-
-        // get top songs for an artist
-        _getTopSongs(artistName, _displayArtistSongs);
 
         // show artist bio data
         $.when(getArtistBiography(artistName))
@@ -106,12 +106,11 @@ function _fetchSimilarArtistsHandler() {
     var artists = _.map(artistParents, function (artist) {
         var artistElem = $(artist);
         return {
-            name: artistElem.text().trim(),
+            name: artistElem.parent().attr("id"),
             levelIndex: _getArtistInfluenceIndex(artistElem)
         };
     });
     // get and display similar artists
-    $("#divider").show();
     $.when(getSimilarArtists(artists))
         .then(function (similarArtists) {
             displaySimilarArtistsResult(similarArtists);
@@ -119,7 +118,7 @@ function _fetchSimilarArtistsHandler() {
 }
 
 function getSimilarArtists(artists) {
-    var NUM_RESULTS = 4;
+    var NUM_RESULTS = 6;
     var similarUrl = 'http://developer.echonest.com/api/v4/artist/similar';
     var parameters = _.map(artists, function (artist) {
         return {
@@ -134,17 +133,25 @@ function getSimilarArtists(artists) {
         });
 }
 
+function _getArtistPlayerElem (artistName) {
+    return $('.artist_player[id*="' + artistName + '"]');
+}
+
 function _getArtistElem (artistName) {
     return $('.artist:contains("' + artistName + '")');
 }
 
 function displaySimilarArtistsResult(artists) {
-    $('#offspring_artists').empty();
+    $('#offspring_players').empty();
     _.each(artists, function (artist) {
-        renderTemplate("offspring_artist_template", $('#offspring_artists'), {artistName: artist.name})
-        var offspringElem = _getArtistElem(artist.name);
-        _addArtistClickListener(offspringElem);
+        _showArtistPlayer(artist.name, $("#offspring_players"));
     });
+}
+
+function _showArtistPlayer(artistName, elem) {
+    renderTemplate("artist_player_template", elem, {artistName: artistName});
+    _addArtistClickListener(_getArtistElem(artistName));
+    _getTopSongs(artistName, _displayArtistSongs);
 }
 
 function _showArtistImage(uri, image) {
@@ -196,17 +203,15 @@ function _getTopSongs(artist, topSongsHandler) {
             playlist.push(track);
         });
 
-        topSongsHandler(playlist);
+        var playerElem = _getArtistPlayerElem(artist).find(".song_player");
+
+        topSongsHandler(playlist, playerElem);
     });
 
     search.appendNext();
 }
 
-function _displayArtistSongs(tracks) {
-    // display list of songs
-    _.each(tracks, function (track) {
-        renderTemplate("artist_song_template", $('#artist_songs'), {songName: track.name, songUri: track.uri})
-    });
+function _displayArtistSongs(tracks, playerElem) {
     // display track player
     var models = sp.require("sp://import/scripts/api/models");
     var views = sp.require("sp://import/scripts/api/views");
@@ -219,33 +224,33 @@ function _displayArtistSongs(tracks) {
     playerView.track = null;
     playerView.context = playlist;
 
-    $("#top_songs_player").append(playerView.node);
+    playerElem.append(playerView.node);
 }
 
-function getUsersTopArtists (userTopArtistsHandler) {
-    var sp = getSpotifyApi(1);
-    var models = sp.require("sp://import/scripts/api/models");
-    var views = sp.require("sp://import/scripts/api/views");
-
-    var toplist = new models.Toplist();
-    /* Set attributes of the Toplist object */
-    toplist.toplistType = models.TOPLISTTYPE.USER;
-    toplist.userName = models.TOPLISTUSER_CURRENT;
-    toplist.matchType = models.TOPLISTMATCHES.ARTISTS;
-
-    toplist.observe(models.EVENT.CHANGE, function() {
-        var count = 0;
-        toplist.results.forEach(function(artist) {
-            if (count < 4) {
-                // FIXME phermanto: find out a better way to break out of this loop
-                userTopArtistsHandler(artist.data.name);
-                count ++;
-            }
-        });
-    });
-
-    toplist.run();
-}
+//function getUsersTopArtists (userTopArtistsHandler) {
+//    var sp = getSpotifyApi(1);
+//    var models = sp.require("sp://import/scripts/api/models");
+//    var views = sp.require("sp://import/scripts/api/views");
+//
+//    var toplist = new models.Toplist();
+//    /* Set attributes of the Toplist object */
+//    toplist.toplistType = models.TOPLISTTYPE.USER;
+//    toplist.userName = models.TOPLISTUSER_CURRENT;
+//    toplist.matchType = models.TOPLISTMATCHES.ARTISTS;
+//
+//    toplist.observe(models.EVENT.CHANGE, function() {
+//        var count = 0;
+//        toplist.results.forEach(function(artist) {
+//            if (count < 4) {
+//                // FIXME phermanto: find out a better way to break out of this loop
+//                userTopArtistsHandler(artist.data.name);
+//                count ++;
+//            }
+//        });
+//    });
+//
+//    toplist.run();
+//}
 
 $(document).ready(function () {
     // ability to add artist to parents list
@@ -271,11 +276,14 @@ $(document).ready(function () {
     });
     $('#clear_artists_button').click(function () {
         $('.selected_artist').remove();
-        $('.offspring_artist').remove();
-        $("#divider").hide();
+        $('.artist_player').remove();
     });
-    $("#divider").hide();
     // ability to make children
-    $('#make_babies_button').click(_fetchSimilarArtistsHandler)
-    getUsersTopArtists(_addArtistToParentsHandler);
+    $('#make_babies_button').click(_fetchSimilarArtistsHandler);
+//    getUsersTopArtists(_addArtistToParentsHandler);
+    
+    $("#parents_offspring_accordion").liteAccordion({
+        containerWidth : 600,
+        containerHeight : 350
+    });
 });
