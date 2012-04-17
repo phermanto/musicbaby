@@ -29,7 +29,7 @@ html {
 }
 
 .selected_artist_influence {
-    width: 40px;
+    width: 70px;
     float: left;
     padding-left: 10px;
     padding-right: 10px;
@@ -39,11 +39,14 @@ html {
     margin-bottom: 0px;
 }
 
+.selected_artist {
+    padding-left: 3px;
+}
 
 /*Artist Information Style*/
 
 #artist_information {
-    padding: 10px;
+    padding: 5px;
 }
 
 #artist_image {
@@ -58,8 +61,11 @@ html {
 /* Accordian Stuff */
 .artist_player {
     float: left;
+    padding: 7px;
 }
 
 .artist {
     cursor: pointer;
+    text-align: center;
+    font-size: 15px;
 }

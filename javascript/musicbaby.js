@@ -252,9 +252,9 @@ function _displayArtistSongs(tracks, playerElem) {
 //    toplist.run();
 //}
 
+
 $(document).ready(function () {
     // ability to add artist to parents list
-    $('#add_artist_button').click(_addArtistToParentsHandler);
     $('#add_artist_search').keyup(function (e) {
         if (e.keyCode === 13) {
             _addArtistToParentsHandler();
@@ -277,13 +277,19 @@ $(document).ready(function () {
     $('#clear_artists_button').click(function () {
         $('.selected_artist').remove();
         $('.artist_player').remove();
+        $("#children_slide").hide();
     });
     // ability to make children
-    $('#make_babies_button').click(_fetchSimilarArtistsHandler);
+    $('#make_babies_button').click($.proxy(function () {
+        _fetchSimilarArtistsHandler();
+        $("#children_slide").show();
+        this.liteAccordion("next");
+    }, $("#parents_offspring_accordion"))); // TODO phermanto: figure out why we need to pass in the elem?! so weird...
 //    getUsersTopArtists(_addArtistToParentsHandler);
     
     $("#parents_offspring_accordion").liteAccordion({
-        containerWidth : 600,
-        containerHeight : 350
+        containerWidth : 555,
+        containerHeight : 400,
+        slideSpeed : 1200
     });
 });
