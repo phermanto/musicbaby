@@ -65,7 +65,7 @@ html {
 /*Artist Information Style*/
 
 #artist_information {
-    padding: 5px;
+    padding: 5px 5px 0px 5px;
 }
 
 #artist_image {
@@ -78,6 +78,10 @@ html {
 }
 
 /* Accordian Stuff */
+#parents_offspring_accordion.accordion {
+    margin-bottom: 0px;
+}
+
 .artist_player {
     float: left;
     padding: 7px;
