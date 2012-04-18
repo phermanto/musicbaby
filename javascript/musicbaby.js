@@ -1,8 +1,10 @@
 var INFLUENCE_SCALE = ["1", "2", "3", "4", "5"];
 var DEFAULT_INFLUENCE = INFLUENCE_SCALE[2];
+var MAX_PARENTS = 5;
 var sp = getSpotifyApi(1);
 var models = sp.require("sp://import/scripts/api/models");
 var views = sp.require("sp://import/scripts/api/views");
+var _toggleArtistSearchBarProxy;
 
 function getArtistBiography(artistName) {
     var biographyUrl = "http://developer.echonest.com/api/v4/artist/biographies";
@@ -31,11 +33,8 @@ function _updateArtistInfluenceBar(barElem, levelIndex) {
 }
 
 function _addArtistToParentsHandler(artistName) {
-    if (!artistName) {
-        artistName = $('#add_artist_search').val().trim();
-        // reset artist search bar contents
-        $('#add_artist_search').val("");
-    }
+    // reset artist search bar contents
+    $('#add_artist_search').val("");
 
     if (artistName.length > 0) {
         var artistInfluenceHtml = getTemplateHtml("artist_parent_influence_template", {artistName: artistName, defaultInfluence: DEFAULT_INFLUENCE});
@@ -47,6 +46,7 @@ function _addArtistToParentsHandler(artistName) {
                 renderTemplate("artist_parent_delete_template", $(this), {});
                 $(this).find('.remove_selected_artist').click(function (elem) {
                     $(elem.currentTarget.parentElement.parentElement.parentElement).remove();
+                    _toggleArtistSearchBarProxy();
                 });
             },
             function () {
@@ -142,6 +142,10 @@ function getSimilarArtists(artists) {
         .pipe(function (data) {
             return data.artists;
         });
+}
+
+function _getNumParentArtists() {
+    return $("#parents").find(".artist").length;
 }
 
 function _getArtistPlayerElem (artistName) {
@@ -241,7 +245,7 @@ function getUsersTopArtists (userTopArtistsHandler) {
     toplist.observe(models.EVENT.CHANGE, function() {
         var count = 0;
         toplist.results.forEach(function(artist) {
-            if (count < 6) {
+            if (count < MAX_PARENTS) {
                 // FIXME phermanto: find out a better way to break out of this loop
                 userTopArtistsHandler(artist.data.name);
                 count ++;
@@ -252,14 +256,24 @@ function getUsersTopArtists (userTopArtistsHandler) {
     toplist.run();
 }
 
+function _toggleArtistSearchBar() {
+    if (_getNumParentArtists() == MAX_PARENTS) {
+        $('#add_artist_search').attr('disabled','disabled');
+        this.tooltip('enable');
+
+    } else {
+        $('#add_artist_search').removeAttr('disabled');
+        this.tooltip('disable');
+    }
+}
 
 $(document).ready(function () {
     // ability to add artist to parents list
-    $('#add_artist_search').keyup(function (e) {
-        if (e.keyCode === 13) {
-            _addArtistToParentsHandler();
-        }
+    $('#max_parents_message').tooltip({
+        title: "Maximum of 5 parents allowed. Please remove some parents before trying to add more.",
+        placement: "right"
     });
+    _toggleArtistSearchBarProxy = $.proxy( _toggleArtistSearchBar, $('#max_parents_message'));
     $('#add_artist_search').typeahead({
         source: function (typeahead, query) {
             var url = encodeURI("http://ws.spotify.com/search/1/artist.json?q=" + query);
@@ -272,6 +286,10 @@ $(document).ready(function () {
                     typeahead.process(artists);
                 }
             });
+        },
+        onselect: function (artistName) {
+            _addArtistToParentsHandler(artistName);
+            _toggleArtistSearchBarProxy();
         }
     });
     $('#clear_artists_button').click(function () {
@@ -279,6 +297,7 @@ $(document).ready(function () {
         $('.artist_player').remove();
         $("#offspring_slide_header").addClass("disabled_slide");
         $(".border.right").addClass("disabled_slide");
+        _toggleArtistSearchBarProxy();
     });
     // ability to make children
     $('#make_babies_button').click($.proxy(function () {
@@ -287,7 +306,11 @@ $(document).ready(function () {
         $(".border.right").removeClass("disabled_slide");
         this.liteAccordion("next");
     }, $("#parents_offspring_accordion"))); // TODO phermanto: figure out why we need to pass in the elem?! so weird...
-    getUsersTopArtists(_addArtistToParentsHandler);
+    
+    getUsersTopArtists(function (artistName) {
+        _addArtistToParentsHandler(artistName);
+        _toggleArtistSearchBarProxy();
+    });
 
     $("#parents_offspring_accordion").liteAccordion({
         containerWidth : document.body.offsetWidth,
