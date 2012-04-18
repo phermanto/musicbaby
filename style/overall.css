@@ -13,6 +13,7 @@ html {
     text-align: center;
     padding-bottom: 20px;
     border-bottom: 3px solid black;
+    font-weight: bold;
 }
 
 
@@ -87,7 +88,6 @@ html {
 .artist {
     cursor: pointer;
     text-align: center;
-    font-size: 15px;
 }
 
 #offspring_slide_header.disabled_slide {
