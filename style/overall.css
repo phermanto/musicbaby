@@ -18,8 +18,25 @@ html {
 
 /*Artist Parents and Offspring style*/
 
+.border {
+    width: 48px;
+    background: #333;
+    height: 48px;
+    position: absolute;
+}
+
+.right {
+    right: 0px;
+}
+.left {
+    left: 0px;
+}
+
 #artist_search {
     padding: 5px 0px 5px 0px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 430px;
 }
 
 .selected_artist_action {
@@ -62,10 +79,24 @@ html {
 .artist_player {
     float: left;
     padding: 7px;
+    width: 128px;
+    height: 187px;
 }
 
 .artist {
     cursor: pointer;
     text-align: center;
     font-size: 15px;
+}
+
+#offspring_slide_header.disabled_slide {
+    background: lightgray;
+    cursor: default;
+}
+.disabled_slide {
+    background: lightgray;
+}
+
+#parents {
+    overflow-y: scroll;
 }

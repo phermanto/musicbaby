@@ -1,26 +1,29 @@
 <div id="app_header">Music, Baby.</div>
-
+<div id="artist_search_bar">
+    <div class="border left"></div>
+    <div class="border right disabled_slide"></div>
+    <div id="artist_search">
+        <input type="text" name="artist_search_box" id="add_artist_search" class="input-medium search-query" placeholder="Enter Artist Name"/>
+        <div class="btn" id="clear_artists_button">
+            <i class="icon-ban-circle"></i>
+            Clear Artists
+        </div>
+        <div class="btn" id="make_babies_button">
+            <i class="icon-music"></i>
+            Make Babies!
+        </div>
+    </div>
+</div>
 <div id="parents_offspring_accordion">
     <ol>
         <li>
             <h2><span>Parents</span></h2>
             <div id="parents">
-                <div id="artist_search">
-                    <input type="text" name="artist_search_box" id="add_artist_search" class="input-medium search-query" placeholder="Enter Artist Name"/>
-                    <div class="btn" id="clear_artists_button">
-                        <i class="icon-ban-circle"></i>
-                        Clear Artists
-                    </div>
-                    <div class="btn" id="make_babies_button">
-                        <i class="icon-music"></i>
-                        Make Babies!
-                    </div>
-                </div>
                 <div id="parents_players"></div>
             </div>
         </li>
-        <li id="children_slide" style="display:none;">
-            <h2><span>Children</span></h2>
+        <li>
+            <h2 id="offspring_slide_header" class="disabled_slide"><span>Children</span></h2>
             <div id="offspring_players"></div>
         </li>
     </ol>
@@ -34,9 +37,6 @@
 <div class="tab-content">
     <div class="tab-pane active" id="artist_intro">
             <div id="artist_image"></div>
-            <div id="artist_familiarity">
-                
-            </div>
             <span id="artist_blurb"></span>
         </div>
         <div class="tab-pane" id="other">

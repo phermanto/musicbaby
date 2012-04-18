@@ -1,5 +1,8 @@
 var INFLUENCE_SCALE = ["1", "2", "3", "4", "5"];
 var DEFAULT_INFLUENCE = INFLUENCE_SCALE[2];
+var sp = getSpotifyApi(1);
+var models = sp.require("sp://import/scripts/api/models");
+var views = sp.require("sp://import/scripts/api/views");
 
 function getArtistBiography(artistName) {
     var biographyUrl = "http://developer.echonest.com/api/v4/artist/biographies";
@@ -40,7 +43,7 @@ function _addArtistToParentsHandler(artistName) {
         var artistElem = artistPlayerElem.find(".artist");
         renderTemplate("artist_parent_delete_template", artistElem, {});
         renderTemplate("artist_parent_influence_template", artistPlayerElem, {artistName: artistName, defaultInfluence: DEFAULT_INFLUENCE});
-        
+
         _addParentArtistClickListeners(artistElem);
     }
 }
@@ -187,9 +190,6 @@ function _getArtistURI(artist) {
 }
 
 function _getTopSongs(artist, topSongsHandler) {
-    var models = sp.require("sp://import/scripts/api/models");
-    var views = sp.require("sp://import/scripts/api/views");
-
     var playlist = [];
 
     var search = new models.Search('artist:"' + artist + '"');
@@ -204,7 +204,6 @@ function _getTopSongs(artist, topSongsHandler) {
         });
 
         var playerElem = _getArtistPlayerElem(artist).find(".song_player");
-
         topSongsHandler(playlist, playerElem);
     });
 
@@ -213,9 +212,6 @@ function _getTopSongs(artist, topSongsHandler) {
 
 function _displayArtistSongs(tracks, playerElem) {
     // display track player
-    var models = sp.require("sp://import/scripts/api/models");
-    var views = sp.require("sp://import/scripts/api/views");
-    
     var playlist = new models.Playlist();
     _.each(tracks, function (track) {
         playlist.add(track);
@@ -227,30 +223,26 @@ function _displayArtistSongs(tracks, playerElem) {
     playerElem.append(playerView.node);
 }
 
-//function getUsersTopArtists (userTopArtistsHandler) {
-//    var sp = getSpotifyApi(1);
-//    var models = sp.require("sp://import/scripts/api/models");
-//    var views = sp.require("sp://import/scripts/api/views");
-//
-//    var toplist = new models.Toplist();
-//    /* Set attributes of the Toplist object */
-//    toplist.toplistType = models.TOPLISTTYPE.USER;
-//    toplist.userName = models.TOPLISTUSER_CURRENT;
-//    toplist.matchType = models.TOPLISTMATCHES.ARTISTS;
-//
-//    toplist.observe(models.EVENT.CHANGE, function() {
-//        var count = 0;
-//        toplist.results.forEach(function(artist) {
-//            if (count < 4) {
-//                // FIXME phermanto: find out a better way to break out of this loop
-//                userTopArtistsHandler(artist.data.name);
-//                count ++;
-//            }
-//        });
-//    });
-//
-//    toplist.run();
-//}
+function getUsersTopArtists (userTopArtistsHandler) {
+    var toplist = new models.Toplist();
+    /* Set attributes of the Toplist object */
+    toplist.toplistType = models.TOPLISTTYPE.USER;
+    toplist.userName = models.TOPLISTUSER_CURRENT;
+    toplist.matchType = models.TOPLISTMATCHES.ARTISTS;
+
+    toplist.observe(models.EVENT.CHANGE, function() {
+        var count = 0;
+        toplist.results.forEach(function(artist) {
+            if (count < 6) {
+                // FIXME phermanto: find out a better way to break out of this loop
+                userTopArtistsHandler(artist.data.name);
+                count ++;
+            }
+        });
+    });
+
+    toplist.run();
+}
 
 
 $(document).ready(function () {
@@ -277,19 +269,21 @@ $(document).ready(function () {
     $('#clear_artists_button').click(function () {
         $('.selected_artist').remove();
         $('.artist_player').remove();
-        $("#children_slide").hide();
+        $("#offspring_slide_header").addClass("disabled_slide");
+        $(".border.right").addClass("disabled_slide");
     });
     // ability to make children
     $('#make_babies_button').click($.proxy(function () {
         _fetchSimilarArtistsHandler();
-        $("#children_slide").show();
+        $("#offspring_slide_header").removeClass("disabled_slide");
+        $(".border.right").removeClass("disabled_slide");
         this.liteAccordion("next");
     }, $("#parents_offspring_accordion"))); // TODO phermanto: figure out why we need to pass in the elem?! so weird...
-//    getUsersTopArtists(_addArtistToParentsHandler);
+    getUsersTopArtists(_addArtistToParentsHandler);
     
     $("#parents_offspring_accordion").liteAccordion({
-        containerWidth : 555,
-        containerHeight : 400,
-        slideSpeed : 1200
+        containerWidth : document.body.offsetWidth,
+        containerHeight : 385,
+        slideSpeed : 1100
     });
 });
