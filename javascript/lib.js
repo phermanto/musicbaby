@@ -32,6 +32,10 @@ function renderTemplate(templateName, elem, params, is_clear_elem) {
     if (is_clear_elem) {
         elem.empty();
     }
-    var html = new EJS({url: 'templates/' + templateName + ".ejs"}).render(params);
+    var html = getTemplateHtml(templateName, params);
     elem.append(html);
+}
+
+function getTemplateHtml(templateName, params) {
+    return new EJS({url: 'templates/' + templateName + ".ejs"}).render(params);
 }

@@ -54,6 +54,7 @@ html {
 
 .selected_artist_influence .progress {
     margin-bottom: 0px;
+    height: 10px;
 }
 
 .selected_artist {
@@ -100,3 +101,4 @@ html {
 #parents {
     overflow-y: scroll;
 }
+

@@ -38,11 +38,22 @@ function _addArtistToParentsHandler(artistName) {
     }
 
     if (artistName.length > 0) {
-        _showArtistPlayer(artistName, $("#parents_players"));
+        var artistInfluenceHtml = getTemplateHtml("artist_parent_influence_template", {artistName: artistName, defaultInfluence: DEFAULT_INFLUENCE});
+        _showArtistPlayer(artistName, artistInfluenceHtml, $("#parents_players"));
         var artistPlayerElem = _getArtistPlayerElem(artistName);
         var artistElem = artistPlayerElem.find(".artist");
-        renderTemplate("artist_parent_delete_template", artistElem, {});
-        renderTemplate("artist_parent_influence_template", artistPlayerElem, {artistName: artistName, defaultInfluence: DEFAULT_INFLUENCE});
+         artistElem.hover(
+            function () {
+                renderTemplate("artist_parent_delete_template", $(this), {});
+                $(this).find('.remove_selected_artist').click(function (elem) {
+                    $(elem.currentTarget.parentElement.parentElement.parentElement).remove();
+                });
+            },
+            function () {
+                $(this).find(".selected_artist_action").remove();
+                $(this).find('.remove_selected_artist').unbind('click');
+            }
+        );
 
         _addParentArtistClickListeners(artistElem);
     }
@@ -52,9 +63,6 @@ function _addParentArtistClickListeners(artistElem) {
     var parentElem = artistElem.parent();
     parentElem.find(".increase_artist_influence").click(_increaseParentArtistInfluenceHandler);
     parentElem.find(".decrease_artist_influence").click(_decreaseParentArtistInfluenceHandler);
-    parentElem.find('.remove_selected_artist').click(function (elem) {
-        $(elem.currentTarget.parentElement.parentElement.parentElement).remove();
-    });
     _addArtistClickListener(artistElem);
 }
 
@@ -147,12 +155,12 @@ function _getArtistElem (artistName) {
 function displaySimilarArtistsResult(artists) {
     $('#offspring_players').empty();
     _.each(artists, function (artist) {
-        _showArtistPlayer(artist.name, $("#offspring_players"));
+        _showArtistPlayer(artist.name, "", $("#offspring_players"));
     });
 }
 
-function _showArtistPlayer(artistName, elem) {
-    renderTemplate("artist_player_template", elem, {artistName: artistName});
+function _showArtistPlayer(artistName, extraContent, elem) {
+    renderTemplate("artist_player_template", elem, {artistName: artistName, extraContent: extraContent});
     _addArtistClickListener(_getArtistElem(artistName));
     _getTopSongs(artistName, _displayArtistSongs);
 }
@@ -280,7 +288,7 @@ $(document).ready(function () {
         this.liteAccordion("next");
     }, $("#parents_offspring_accordion"))); // TODO phermanto: figure out why we need to pass in the elem?! so weird...
     getUsersTopArtists(_addArtistToParentsHandler);
-    
+
     $("#parents_offspring_accordion").liteAccordion({
         containerWidth : document.body.offsetWidth,
         containerHeight : 385,
