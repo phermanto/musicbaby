@@ -14,9 +14,14 @@ function echonestGet (baseURL, numResults, parameters) {
 
 function _getEchonestURL (baseURL, numResults, parameters) {
     var echonestUrl = baseURL + '?api_key=' + API_KEYS.ECHONEST;
-    echonestUrl += '&format=json&results=' + numResults + '&start=0';
-    var extraParams = _getFormattedUrlParameters(parameters);
-    echonestUrl += extraParams;
+    var defaultParameters = [
+        {name: "format", value: "json"},
+        {name: "results", value: numResults},
+        {name: "start", value: 0}
+    ];
+    parameters = parameters.concat(defaultParameters);
+    var stringifiedParams = _getFormattedUrlParameters(parameters);
+    echonestUrl += stringifiedParams;
     return encodeURI(echonestUrl);
 }
 
