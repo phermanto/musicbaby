@@ -1,6 +1,8 @@
 var INFLUENCE_SCALE = ["1", "2", "3", "4", "5"];
 var DEFAULT_INFLUENCE = INFLUENCE_SCALE[2];
 var MAX_PARENTS = 5;
+var NUM_RESULTS_SIMILAR_ARTISTS = 6;
+var NUM_RESULTS_ARTIST_REVIEWS = 6;
 var sp = getSpotifyApi(1);
 var models = sp.require("sp://import/scripts/api/models");
 var views = sp.require("sp://import/scripts/api/views");
@@ -9,10 +11,8 @@ var _toggleArtistSearchBarProxy;
 function getArtistBiography(artistName) {
     var biographyUrl = "http://developer.echonest.com/api/v4/artist/biographies";
     var parameters = [
-        {name: "name",
-         value: artistName},
-        {name: "license",
-         value: "cc-by-sa"}
+        {name: "name", value: artistName},
+        {name: "license", value: "cc-by-sa"}
     ];
     return $.when(echonestGet(biographyUrl, 1, parameters))
         .pipe(function (data) {
@@ -109,7 +109,38 @@ function _addArtistClickListener(artistAddedElem) {
                     _showArtistAlbumImage(data.uri, _showArtistImage);
                 }
             });
+        // show artist reviews
+        $.when(getArtistReviews(artistName))
+            .pipe(function(reviews) {
+                $('#artist_reviews_container').empty();
+                _.each(reviews, function (review) {
+                    var formattedReviewDate = "";
+                    if (review.date_reviewed) {
+                        formattedReviewDate = review.date_reviewed.match(/(^\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}$/)[1];
+                    }
+//                    var formattedReviewName = review.name.match(/.*\((.*)\)$/)[1];
+                    var formattedReviewName = review.name;
+                    var params = {
+                        reviewDate: formattedReviewDate,
+                        reviewUrl: review.url,
+                        reviewText: review.summary,
+                        reviewName: formattedReviewName
+                    };
+                    renderTemplate('artist_review_template', $('#artist_reviews_container'), params);
+                });
+            });
     });
+}
+
+function getArtistReviews(artistName) {
+    var reviewsUrl = "http://developer.echonest.com/api/v4/artist/reviews";
+    var parameters = [
+        {name: "name", value: artistName}
+    ];
+    return $.when(echonestGet(reviewsUrl, NUM_RESULTS_ARTIST_REVIEWS, parameters))
+        .pipe(function (data) {
+            return data.reviews;
+        });
 }
 
 function _fetchSimilarArtistsHandler() {
@@ -129,7 +160,6 @@ function _fetchSimilarArtistsHandler() {
 }
 
 function getSimilarArtists(artists) {
-    var NUM_RESULTS = 6;
     var similarUrl = 'http://developer.echonest.com/api/v4/artist/similar';
     var parameters = _.map(artists, function (artist) {
         return {
@@ -138,7 +168,7 @@ function getSimilarArtists(artists) {
         };
     });
 
-    return $.when(echonestGet(similarUrl, NUM_RESULTS, parameters))
+    return $.when(echonestGet(similarUrl, NUM_RESULTS_SIMILAR_ARTISTS, parameters))
         .pipe(function (data) {
             return data.artists;
         });
