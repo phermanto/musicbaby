@@ -41,16 +41,16 @@ function _addArtistToParentsHandler(artistName) {
         _showArtistPlayer(artistName, artistInfluenceHtml, $("#parents_players"));
         var artistPlayerElem = _getArtistPlayerElem(artistName);
         var artistElem = artistPlayerElem.find(".artist");
-         artistElem.hover(
+        artistPlayerElem.hover(
             function () {
                 renderTemplate("artist_parent_delete_template", $(this), {});
                 $(this).find('.remove_selected_artist').click(function (elem) {
-                    $(elem.currentTarget.parentElement.parentElement.parentElement).remove();
+                    $(elem.currentTarget.parentElement.parentElement).remove();
                     _toggleArtistSearchBarProxy();
                 });
             },
             function () {
-                $(this).find(".selected_artist_action").remove();
+                $(this).find(".selected_artist_action").has(".remove_selected_artist").remove();
                 $(this).find('.remove_selected_artist').unbind('click');
             }
         );
@@ -118,7 +118,6 @@ function _addArtistClickListener(artistAddedElem) {
                     if (review.date_reviewed) {
                         formattedReviewDate = review.date_reviewed.match(/(^\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}$/)[1];
                     }
-//                    var formattedReviewName = review.name.match(/.*\((.*)\)$/)[1];
                     var formattedReviewName = review.name;
                     var params = {
                         reviewDate: formattedReviewDate,
